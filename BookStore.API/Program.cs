@@ -1,4 +1,7 @@
 using BookStore.API.Data;
+using BookStore.API.Models;
+using BookStore.API.Validators;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<IValidator<Book>, BookValidator>();
 
 builder.Services.AddDbContext<AppDbContext>(option =>
 {

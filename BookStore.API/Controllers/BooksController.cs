@@ -1,5 +1,6 @@
 ﻿using BookStore.API.Data;
 using BookStore.API.Models;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,10 +11,12 @@ namespace BookStore.API.Controllers;
 public class BooksController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly IValidator<Book> _bookValidator;
 
-    public BooksController(AppDbContext context)
+    public BooksController(AppDbContext context,IValidator<Book> bookValidator)
     {
         _context = context;
+        _bookValidator = bookValidator;
     }
 
     [HttpGet]
@@ -35,6 +38,14 @@ public class BooksController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Book>> CreateBook(Book book)
     {
+        var validateResult = await _bookValidator.ValidateAsync(book);
+        
+        if (!validateResult.IsValid)
+        {
+            return BadRequest(new
+                { error = validateResult.Errors.Select(x => new { x.AttemptedValue, x.ErrorMessage }) });
+        }
+        
         _context.Books.Add(book);
         await _context.SaveChangesAsync();
 
